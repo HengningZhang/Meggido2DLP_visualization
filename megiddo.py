@@ -1,3 +1,22 @@
+#Import Flask Library
+from flask import Flask, render_template, request, session, url_for, redirect
+import pymysql.cursors
+import datetime
+import json
+
+#Initialize the app from Flask
+app = Flask(__name__)
+
+@app.route('/')
+def main():
+    return render_template('main.html')
+
+@app.route('/get_constraints', methods=['GET', 'POST'])
+def get_constraints():
+    data = json.loads(request.args.get('data'))
+    print(data)
+    return jsonify(result=True)
+
 def process_input(pair_of_points):
     constraints=[]
     for ((x1,y1),(x2,y2)) in pair_of_points:
@@ -72,7 +91,7 @@ class Megiddo:
         for i in range(len(self.constraints)):
             for j in range(i,len(self.constraints)):
                 intersection.append(calculate_intersection(self.constraints[i],self.constraints[j]))
-                
+
 
     def step(self):
         if self.optimal_point!=None or self.optimal_line!=None:
@@ -106,3 +125,5 @@ class Megiddo:
         
 
 
+if __name__ == "__main__":
+    app.run('127.0.0.1', 5000, debug = True)
