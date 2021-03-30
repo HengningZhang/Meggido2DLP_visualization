@@ -71,7 +71,8 @@ class Megiddo:
         intersections=[]
         for i in range(len(self.constraints)):
             for j in range(i,len(self.constraints)):
-                intersection.append(calculate_intersection())
+                intersection.append(calculate_intersection(self.constraints[i],self.constraints[j]))
+                
 
     def step(self):
         if self.optimal_point!=None or self.optimal_line!=None:
