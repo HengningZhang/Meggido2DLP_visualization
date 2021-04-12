@@ -1,21 +1,3 @@
-#Import Flask Library
-from flask import Flask, render_template, request, session, url_for, redirect
-import pymysql.cursors
-import datetime
-import json
-
-#Initialize the app from Flask
-app = Flask(__name__)
-
-@app.route('/')
-def main():
-    return render_template('main.html')
-
-@app.route('/get_constraints', methods=['GET', 'POST'])
-def get_constraints():
-    data = json.loads(request.args.get('data'))
-    print(data)
-    return jsonify(result=True)
 
 def process_input(pair_of_points):
     constraints=[]
@@ -125,5 +107,3 @@ class Megiddo:
         
 
 
-if __name__ == "__main__":
-    app.run('127.0.0.1', 5000, debug = True)

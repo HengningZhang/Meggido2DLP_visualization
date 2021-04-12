@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<style>
 			body {
-				background-color: black;
+				background-color: grey;
 			}
 			
 			canvas {
@@ -20,153 +20,8 @@
 	<body>
         
 		<canvas id="canvas"></canvas>
-		<script type="application/javascript">
-			var canvasWidth = 1500;
-			var canvasHeight = 1000;
-			var canvas = null;
-			var bounds = null;
-			var ctx = null;
-			var hasLoaded = false;
-			
-			var startX = 0;
-			var startY = 0;
-			var mouseX = 0;
-			var mouseY = 0;
-			var isDrawing = false;
-			var existingLines = [];
-            var linesForPython = [];
-			function draw() {
-				ctx.fillStyle = "#333333";
-				ctx.fillRect(0,0,canvasWidth,canvasHeight);
-				
-				ctx.strokeStyle = "black";
-				ctx.lineWidth = 2;
-				ctx.beginPath();
-				
-				for (var i = 0; i < existingLines.length; ++i) {
-					var line = existingLines[i];
-					ctx.moveTo(line.startX,line.startY);
-					ctx.lineTo(line.endX,line.endY);
-				}
-				
-				ctx.stroke();
-				
-				if (isDrawing) {
-					ctx.strokeStyle = "darkred";
-					ctx.lineWidth = 3;
-					ctx.beginPath();
-					ctx.moveTo(startX,startY);
-					ctx.lineTo(mouseX,mouseY);
-					ctx.stroke();
-				}
-			}
-			
-			function onmousedown(e) {
-				if (hasLoaded && e.button === 0) {
-					if (!isDrawing) {
-						startX = e.clientX - bounds.left;
-						startY = e.clientY - bounds.top;
-						
-						isDrawing = true;
-					}
-					
-					draw();
-				}
-                
-			}
-			
-			function onmouseup(e) {
-				if (hasLoaded && e.button === 0) {
-					if (isDrawing) {
-						existingLines.push({
-							startX: startX,
-							startY: startY,
-							endX: mouseX,
-							endY: mouseY
-						});
-                        linesForPython.push(startX)
-                        linesForPython.push(startY*(-1))
-                        linesForPython.push(mouseX)
-                        linesForPython.push(mouseY*(-1))
-                        console.log(linesForPython)
-						console.log(startX,startY*(-1),mouseX,mouseY*(-1))
-						isDrawing = false;
-					}
-					
-					draw();
-				}
-                
-			}
-			
-			function onmousemove(e) {
-				if (hasLoaded) {
-					mouseX = e.clientX - bounds.left;
-					mouseY = e.clientY - bounds.top;
-					
-					if (isDrawing) {
-						draw();
-					}
-				}
-			}
-            function send_constraints(){
-                console.log(linesForPython)
-                const response = fetch("/get_constraints", {
-                    method: 'POST',
-                    data:JSON.stringify(linesForPython),
-                });
-                const reply = response.json();
-                console.log(reply)
-                // post("/get_constraints",{
-                //     data:JSON.stringify(linesForPython),
-                // })
-            }
-			// $(document).ready(function(){
-            //     $("button").click(function(){
-            //         $.post("/get_constraints",
-            //         {
-            //         data:JSON.stringify(linesForPython)
-            //         });
-            //     });
-            // });
-            // $(document).ready(function(){
-            //     $("button").click(function(){
-            //         $.post("localhost:5000/get_constraints",
-            //         {
-            //         data:JSON.stringify(linesForPython)
-            //         });
-            //     });
-            // });
-
-
-			window.onload = function() {
-				canvas = document.getElementById("canvas");
-				canvas.width = canvasWidth;
-				canvas.height = canvasHeight;
-				canvas.onmousedown = onmousedown;
-				canvas.onmouseup = onmouseup;
-				canvas.onmousemove = onmousemove;
-				
-				bounds = canvas.getBoundingClientRect();
-				ctx = canvas.getContext("2d");
-				hasLoaded = true;
-				
-				draw();
-			}
-			
-            
-		</script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js">
-            $(document).ready(function(){
-                $("button").click(function(){
-                    $.post("/get_constraints",
-                    {
-                    data:JSON.stringify(linesForPython)
-                    });
-                    console.log("button clicked")
-                });
-            });
-            
-        </script>
-        <button>Click me</button>
+		<script src="app.js"></script>
+		<button onclick="save_constraints()">Save Constraints</button>
+        <button onclick="step()">Run</button>
 	</body>
 </html>
