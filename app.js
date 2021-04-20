@@ -440,6 +440,12 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
             if(a_smaller_than_0 && a_bigger_than_0){
                 //intersection is local minimum, same as global minimum
                 optimal_point=top_lower_constraint[0];
+                ctx.beginPath();
+                ctx.arc(top_lower_constraint[0][0], -top_lower_constraint[0][1], 15, 0, 2 * Math.PI, false);
+                ctx.fillStyle = 'green';
+                ctx.fill()
+                ctx.stroke();
+                alert("optimal point found")
                 found=true;
                 return true;
             }
@@ -554,7 +560,7 @@ function step(){
                     ctx.fillStyle = 'green';
                     ctx.fill()
                     ctx.stroke();
-                    alert("optimal point is at (",optimal_point[0],optimal_point[1],")")
+                    alert("optimal point found")
                 }
                 else{
                     ctx.beginPath();
