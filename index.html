@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 	<head>
+		<title>Megiddo 2D LP Visualizer</title>
 		<meta charset="utf-8">
 		<style>
 			body {
@@ -9,8 +10,8 @@
 			
 			canvas {
 				position: absolute;
-				margin: auto;
-				left: 0;
+				/* margin: auto; */
+				left: 500px;
 				right: 0;
 				border: solid 1px white;
 				border-radius: 10px;
@@ -25,7 +26,30 @@
         <br>
 		<button onclick="step()">Run</button>
 		<br>
+		<div class="prompt" style="font-size:20px">Start by drawing upper constraints on the board</div>
 		<div class="remainingLC_title"></div>
 		<div class="remainingLC"></div>
+		<br>
+		<br>
+		<div style="font-size:18px">Terminologies</div>
+		<div>TLC: top lower constraints stabbed by test line</div>
+		<div>BUC: bottom upper constraints stabbed by test line</div>
+		<div>TLC' and BUC' are their derivatives</div>
+		<br>
+		<br>
+		<div style="font-size:18px">Colored lines</div>
+		<div style="color:red">upper constraints</div>
+		<div style="color:green">lower constraints</div>
+		<div style="color:yellow">test line</div>
+		<div style="color:#8A2BE2">BUC</div>
+		<div style="color:#7FFF00">TLC</div>
+		<div style="color:white">constraint to discard</div>
+		<br>
+		<br>
+		<div style="font-size:18px">Colored points</div>
+		<div style="color:blue">intersection of arbitrary pairs</div>
+		<div style="color:white">pair with one constraint to discard</div>
+		<div style="color:lime">optimal point(if found)</div>
+
 	</body>
 </html>

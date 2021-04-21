@@ -120,11 +120,8 @@ function onmouseup(e) {
                     existingLower.push(fullLine)
                 }
                 
-                console.log(startX,startY*(-1),mouseX,mouseY*(-1))
                 isDrawing = false;
             }
-            console.log(existingLines)
-            console.log(existingUpper)
             draw();
         }
     }
@@ -149,7 +146,6 @@ function onmousemove(e) {
 function process_line(x1,y1,x2,y2){
     a=(y2-y1)/(x2-x1)
     b=y1-a*x1
-    console.log(a,b)
     return [a,b]
 }
 
@@ -180,7 +176,6 @@ function pair(){
             constraint1=remainingLower[i]
             constraint2=remainingLower[i+1]
             existingPairs.push([calculate_intersection(constraint1,constraint2),constraint1,constraint2])
-            // console.log("paired",constraint1,constraint2)
         }
         else{
             leftover=remainingLower[i]
@@ -211,7 +206,6 @@ function update(){
     }
     ctx.beginPath();
     ctx.strokeStyle = "green";
-    console.log("total number of lower constraints",existingLower.length)
     for (var i = 0; i < existingLower.length; ++i) {
         var line = existingLower[i];
         ctx.moveTo(line.startX,line.startY);
@@ -229,7 +223,6 @@ function update_pair(){
     for (var i = 0; i < existingPairs.length; ++i) {
         ctx.beginPath();
         var intersection = existingPairs[i][0];
-        // console.log("drawing circle at",intersection[0], -intersection[1])
         ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
         ctx.fillStyle = 'blue';
         ctx.fill()
@@ -251,7 +244,6 @@ function update_discard(){
     for (var i = 0; i < pairs_at_risk.length; ++i) {
         ctx.beginPath();
         var intersection = pairs_at_risk[i][0];
-        // console.log("drawing circle at",intersection[0], -intersection[1])
         ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
         ctx.fillStyle = 'white';
         ctx.fill()
@@ -272,7 +264,6 @@ function get_median_intersection(){
             break;
         }
     }
-    console.log("intersection",intersection)
     ctx.beginPath();
     ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
     ctx.fillStyle = 'yellow';
@@ -282,6 +273,7 @@ function get_median_intersection(){
 }
 
 function test_line(x){
+    document.querySelector('.prompt').innerHTML = "deploying test line";
     bottom_upper_constraint=[Number.MAX_VALUE,[0,0]]
     top_lower_constraint=[Number.MIN_SAFE_INTEGER,[0,0]]
     var a=null;
@@ -299,7 +291,6 @@ function test_line(x){
         }
             
     }
-    console.log("lowerC",remainingLower)
     for(var i = 0; i < remainingLower.length; ++i){
         constraint=remainingLower[i];
         a=constraint[0];
@@ -315,7 +306,6 @@ function test_line(x){
     }
     
     //what if top/bottom is an intersection?
-    console.log("drawing test line with x = ",x)
     ctx.strokeStyle = "yellow";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -334,7 +324,6 @@ function test_line(x){
     ctx.strokeStyle = "#8A2BE2";
     for(var i = 1; i < bottom_upper_constraint.length; ++i){
     line = get_full_line(bottom_upper_constraint[i][0],bottom_upper_constraint[i][1]);
-    // console.log("drawing buc",line)
     ctx.moveTo(line.startX,line.startY);
     ctx.lineTo(line.endX,line.endY);
     }
@@ -343,7 +332,6 @@ function test_line(x){
 }
 
 function discard_left(testline){
-    console.log("discarding left")
     while(existingPairs.length>0){
         curPair=existingPairs.pop()
         if(curPair[0][0]<testline){
@@ -366,7 +354,6 @@ function discard_left(testline){
 }
 
 function discard_right(testline){
-    console.log("discarding right")
     while(existingPairs.length>0){
         curPair=existingPairs.pop()
         if(curPair[0][0]>testline){
@@ -395,7 +382,6 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
     var tlc_ab=top_lower_constraint[1]
     var buc_ab=bottom_upper_constraint[1]
     //params of tlc and buc
-    console.log(top_lower_constraint)
     if(tlc_y>=buc_y){
         if(tlc_ab[0]==buc_ab[0]){
             //tlc and buc are parallel, no optimal point can exist
@@ -404,12 +390,14 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
         else if (tlc_ab[0]>buc_ab[0]){
             //optimal point can exist on the left
             //discard half of the pairs on the right with larger a
+            document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on right";
             discard_right(testline)
             return true
         }
         else{
             //optimal point can exist on the right
             //discard half of the pairs on the left with smaller a
+            document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on left";
             discard_left(testline)
             return true
         }
@@ -428,15 +416,12 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
                     return true;
                 }
                 else if(top_lower_constraint[i][0]*100<0){
-                    console.log("set smaller true")
                     a_smaller_than_0=true;
                 }
                 else{
-                    console.log("set bigger true")
                     a_bigger_than_0=true;
                 }
             }
-            console.log("tlc",top_lower_constraint,a_smaller_than_0,a_bigger_than_0)
             if(a_smaller_than_0 && a_bigger_than_0){
                 //intersection is local minimum, same as global minimum
                 optimal_point=top_lower_constraint[0];
@@ -445,32 +430,33 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
                 ctx.fillStyle = 'green';
                 ctx.fill()
                 ctx.stroke();
-                alert("optimal point found")
+                document.querySelector('.prompt').innerHTML = "Optimal point found";
                 found=true;
                 return true;
             }
             else{
                 if(!a_smaller_than_0){
-                    console.log("all a bigger than 0")
                     //all of tlc have a bigger than 0
                     //optimal on the left
+                    document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard on right";
                     discard_right(testline)
                 }
                 else{
-                    console.log("all a smaller than 0")
                     //optimal on the right
+                    document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard on left";
                     discard_left(testline)
                 }        
             }
         }
         else{
-            console.log("tlc",top_lower_constraint)
             if(top_lower_constraint[1][0]>0){
                 //optimal point on left
+                document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard on right";
                 discard_right(testline)
             }
             else{
                 //optimal point on right
+                document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard on left";
                 discard_left(testline)
             }
         }
@@ -483,7 +469,6 @@ function check_above_or_below(line,point){
     var b=line[1];
     var x=point[0]
     var y=point[1]
-    console.log(a*x+b,y)
     if(a*x+b>y){
         //point below line
         return false
@@ -501,7 +486,6 @@ function brute_force(){
             lower_intersections.push([calculate_intersection(remainingLower[i],remainingLower[j]),remainingLower[i],remainingLower[j]])
         }
     }
-    console.log(lower_intersections)
     for(var i=0;i<lower_intersections.length;i++){
         var aboveUpper=false;
         var belowLower=false;
@@ -520,7 +504,6 @@ function brute_force(){
             }
             
         }
-        console.log(lower_intersections[i],aboveUpper,belowLower)
         if(!aboveUpper && !belowLower){
             if(lower_intersections[i][0][1]<lowest_point[0]){
                 lowest_point=[lower_intersections[i][0][1],lower_intersections[i][0]]
@@ -547,8 +530,6 @@ var mid_int=null;
 var result=null;
 
 function step(){
-    console.log("in step",counter)
-    console.log("remaininglower",remainingLower)
     document.querySelector('.remainingLC_title').innerHTML = "#remaining lower constraints"
     document.querySelector('.remainingLC').innerHTML = remainingLower.length;
     if(!found){
@@ -560,7 +541,7 @@ function step(){
                     ctx.fillStyle = 'green';
                     ctx.fill()
                     ctx.stroke();
-                    alert("optimal point found")
+                    document.querySelector('.prompt').innerHTML = "Optimal point found";
                 }
                 else{
                     ctx.beginPath();
@@ -578,12 +559,12 @@ function step(){
                     ctx.moveTo(optimal_line[0][0],-optimal_line[0][1]);
                     ctx.lineTo(optimal_line[1][0],-optimal_line[1][1]);
                     ctx.stroke();
-                    alert("optimal point is on a line")
+                    document.querySelector('.prompt').innerHTML = "Optimal point is on a line";
                 }
                 found=true
             }
             else{
-                alert("no feasible region!")
+                document.querySelector('.prompt').innerHTML = "No feasible region";
                 found=true
             }
             return true
@@ -593,7 +574,6 @@ function step(){
         }
         else if(counter%3==1){
             pair();
-            console.log("existingPairs",existingPairs);
             update_pair();
             mid_int=get_median_intersection()
             result=test_line(mid_int[0])
@@ -602,9 +582,6 @@ function step(){
         }
         else{
             remainingLower.length=0
-            console.log("before discarding",remainingLower.length)
-            console.log("mid_int",mid_int)
-            console.log("passed in value",top_lower_constraint[1][0])
             if(!discard_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)){
                 alert("found!")
             }
@@ -617,8 +594,6 @@ function step(){
             pairs_at_risk.length=0
             document.querySelector('.remainingLC').innerHTML = remainingLower.length;
         }
-        console.log("remaining lower",remainingLower)
-        console.log("pairs",existingPairs)
         counter++
         
         
@@ -628,7 +603,7 @@ function step(){
             alert("already found!")
         }
         else{
-            alert("no feasible region!")
+            document.querySelector('.prompt').innerHTML = "No feasible region";
         }
         
     }
@@ -636,20 +611,16 @@ function step(){
 }
 
 function save_constraints(){
-    console.log("saving",gotUpper)
     if(!gotUpper){
         gotUpper=true;
+        document.querySelector('.prompt').innerHTML = "Now draw the lower constraints";
     }
     else if(!gotLower){
         gotLower=true;
+        document.querySelector('.prompt').innerHTML = "Press run to show steps!";
     }
     else{
         alert("Already got all the constraints.")
     }
     
 }
-
-
-
-
-
