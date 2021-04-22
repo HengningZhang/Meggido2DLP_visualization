@@ -3,5 +3,5 @@
 Peronal project for CS6703 Computational Geometry <br/>
 Implemented Megiddo's Linear Programming algorithm that computes the optimal point in linear time. <br/>
 Visualization by color coding using Javascript Canvas. <br/>
-Canvas board in reference of https://stackoverflow.com/questions/49885020/drawing-a-straight-line-using-mouse-events-on-canvas-in-javascript
+Canvas board refering https://stackoverflow.com/questions/49885020/drawing-a-straight-line-using-mouse-events-on-canvas-in-javascript
 
