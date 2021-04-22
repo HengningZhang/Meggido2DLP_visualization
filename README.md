@@ -1,4 +1,4 @@
-# Meggido2DLP_visualization
+# Megiddo2DLP_visualization
 [Megiddo 2D LP Visualizer](https://hengningzhang.github.io/Meggido2DLP_visualization/)<br/>
 Peronal project for CS6703 Computational Geometry <br/>
 Implemented Megiddo's Linear Programming algorithm that computes the optimal point in linear time. <br/>
