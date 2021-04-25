@@ -22,6 +22,7 @@ var gotLower = false;
 // upperConstraints and remainingLower contains points that define the straight lines
 
 var existingPairs=[];
+var existingUpperPairs=[]
 var optimal_point=null;
 var optimal_line=null;
 var top_lower_constraint=null;
@@ -31,6 +32,7 @@ var found=false;
 var pairs_at_risk=[]
 var constraints_to_discard=[]
 var leftover=null
+var upperleftover=null
 
 canvas = document.getElementById("canvas");
 canvas.width = canvasWidth;
@@ -183,13 +185,33 @@ function pair(){
     }
 };
 
+function pair_upper(){
+    for(var i = 0; i < upperConstraints.length; i=i+2){
+        if(i!=upperConstraints.length-1){
+            constraint1=upperConstraints[i]
+            constraint2=upperConstraints[i+1]
+            existingUpperPairs.push([calculate_intersection(constraint1,constraint2),constraint1,constraint2])
+        }
+        else{
+            upperleftover=upperConstraints[i]
+        }
+    }
+};
+
 function update(){
     ctx.fillStyle = "#333333";
     ctx.fillRect(0,0,canvasWidth,canvasHeight);
     
     ctx.strokeStyle = "red";
     ctx.lineWidth = 2;
+    if(upperConstraints.length!=0){
+        existingUpper.length=0
+        for(var i = 0; i < upperConstraints.length; ++i){
+            existingUpper.push(get_full_line(upperConstraints[i][0],upperConstraints[i][1]))
+        }
+    }
     ctx.beginPath();
+    
     
     for (var i = 0; i < existingUpper.length; ++i) {
         var line = existingUpper[i];
@@ -223,6 +245,17 @@ function update_pair(){
     for (var i = 0; i < existingPairs.length; ++i) {
         ctx.beginPath();
         var intersection = existingPairs[i][0];
+        ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
+        ctx.fillStyle = 'blue';
+        ctx.fill()
+        ctx.stroke();
+    }
+}
+
+function update_upper_pair(){
+    for (var i = 0; i < existingUpperPairs.length; ++i) {
+        ctx.beginPath();
+        var intersection = existingUpperPairs[i][0];
         ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
         ctx.fillStyle = 'blue';
         ctx.fill()
@@ -265,6 +298,28 @@ function get_median_intersection(){
         }
     }
     ctx.beginPath();
+    ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
+    ctx.fillStyle = 'yellow';
+    ctx.fill()
+    ctx.stroke();
+    return intersection
+}
+
+function get_median_intersection_upper(){
+    var intersections=[]
+    for (var i = 0; i < existingUpperPairs.length; ++i) {
+        intersections.push(existingUpperPairs[i][0][0])
+    }
+    mid_intersection=median(intersections)
+    
+    for (var i = 0; i < existingUpperPairs.length; ++i) {
+        if(mid_intersection==existingUpperPairs[i][0][0]){
+            var intersection=existingUpperPairs[i][0];
+            break;
+        }
+    }
+    ctx.beginPath();
+    // console.log(intersection)
     ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
     ctx.fillStyle = 'yellow';
     ctx.fill()
@@ -353,6 +408,28 @@ function discard_left(testline){
     }
 }
 
+function discard_left_upper(testline){
+    while(existingUpperPairs.length>0){
+        curPair=existingUpperPairs.pop()
+        if(curPair[0][0]<testline){
+            pairs_at_risk.push(curPair)
+            if(curPair[1][0]>curPair[2][0]){
+                upperConstraints.push(curPair[2]);
+                constraints_to_discard.push(get_full_line(curPair[1][0],curPair[1][1]));
+            }
+            else{
+                upperConstraints.push(curPair[1]);
+                constraints_to_discard.push(get_full_line(curPair[2][0],curPair[2][1]));
+            }
+
+        }
+        else{
+            upperConstraints.push(curPair[1]);
+            upperConstraints.push(curPair[2]);
+        }
+    }
+}
+
 function discard_right(testline){
     while(existingPairs.length>0){
         curPair=existingPairs.pop()
@@ -371,6 +448,28 @@ function discard_right(testline){
         else{
             remainingLower.push(curPair[1]);
             remainingLower.push(curPair[2]);
+        }
+    }
+}
+
+function discard_right_upper(testline){
+    while(existingUpperPairs.length>0){
+        curPair=existingUpperPairs.pop()
+        if(curPair[0][0]>testline){
+            pairs_at_risk.push(curPair)
+            if(curPair[1][0]>curPair[2][0]){
+                upperConstraints.push(curPair[1]);
+                constraints_to_discard.push(get_full_line(curPair[2][0],curPair[2][1]));
+            }
+            else{
+                upperConstraints.push(curPair[2]);
+                constraints_to_discard.push(get_full_line(curPair[1][0],curPair[1][1]));
+            }
+
+        }
+        else{
+            upperConstraints.push(curPair[1]);
+            upperConstraints.push(curPair[2]);
         }
     }
 }
@@ -415,7 +514,7 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
                     found=true;
                     return true;
                 }
-                else if(top_lower_constraint[i][0]*100<0){
+                else if(top_lower_constraint[i][0]<0){
                     a_smaller_than_0=true;
                 }
                 else{
@@ -464,12 +563,89 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
     }
 }
 
+function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_constraint){
+    var tlc_y=top_lower_constraint[0]
+    var buc_y=bottom_upper_constraint[0]
+    //values of tlc and buc at test line
+    var tlc_ab=top_lower_constraint[1]
+    var buc_ab=bottom_upper_constraint[1]
+    //params of tlc and buc
+    if(tlc_y>=buc_y){
+        if(bottom_upper_constraint.length>=3){
+            //potential optimal if >=2 lower constraints intersect
+            var a_smaller_than_0=false;
+            var a_bigger_than_0=false;
+            
+            for(var i=1;i<bottom_upper_constraint.length;i++){
+                if(bottom_upper_constraint[i][0]<0){
+                    a_smaller_than_0=true;
+                }
+                else{
+                    a_bigger_than_0=true;
+                }
+            }
+            if(a_smaller_than_0 && a_bigger_than_0){
+                //no feasible region exists
+                return false;
+            }
+            else{
+                var a1=bottom_upper_constraint[1][0]
+                var a2=bottom_upper_constraint[2][0]
+                if(tlc_ab[0]>max(a1,a2)){
+                    //tlc[a]>max(buc[a]), feasible region may exist on left
+                    document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]>max(buc[a]), discard upper right";
+                    discard_right_upper(testline)
+                }
+                else if (tlc_ab[0]<min(a1,a2)){
+                    //tlc[a]<min(buc[a]), feasible region may exist on right
+                    document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]<min(buc[a]), discard upper left";
+                    discard_left_upper(testline)
+                }
+                else{
+                    return false
+                }       
+            }
+        }
+        else{
+            if (tlc_ab[0]>buc_ab[0]){
+                //optimal point can exist on the left
+                //discard half of the pairs on the right with larger a
+                document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on right";
+                discard_right_upper(testline)
+                return true
+            }
+            else{
+                //optimal point can exist on the right
+                //discard half of the pairs on the left with smaller a
+                document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on left";
+                discard_left_upper(testline)
+                return true
+            }
+        }
+    }
+    else{
+        //already inside feasible region
+        if(top_lower_constraint[1][0]>0){
+            //optimal point on left
+            document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard on right";
+            discard_right_upper(testline)
+        }
+        else{
+            //optimal point on right
+            document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard on left";
+            discard_left_upper(testline)
+        }
+        return true;
+    }
+}
+
 function check_above_or_below(line,point){
     var a=line[0];
     var b=line[1];
     var x=point[0]
     var y=point[1]
-    if(a*x+b>y){
+    
+    if(Math.round(parseFloat(a*x+b))>Math.round(parseFloat(y))){
         //point below line
         return false
     }
@@ -478,26 +654,46 @@ function check_above_or_below(line,point){
         return true
     }
 }
+
+function on_line(line,point){
+    var a=line[0];
+    var b=line[1];
+    var x=point[0]
+    var y=point[1]
+    return Math.round(parseFloat(a*x+b))==Math.round(parseFloat(y))
+}
 function brute_force(){
     var lowest_point=[Number.MAX_VALUE]
-    var lower_intersections=[]
+    var intersections=[]
     for(var i=0;i<remainingLower.length;i++){
         for(var j=i+1;j<remainingLower.length;j++){
-            lower_intersections.push([calculate_intersection(remainingLower[i],remainingLower[j]),remainingLower[i],remainingLower[j]])
+            intersections.push([calculate_intersection(remainingLower[i],remainingLower[j]),remainingLower[i],remainingLower[j]])
         }
     }
-    for(var i=0;i<lower_intersections.length;i++){
+
+    for(var i=0;i<remainingLower.length;i++){
+        // console.log(intersections)
+        for(var j=0;j<upperConstraints.length;j++){
+            intersections.push([calculate_intersection(remainingLower[i],upperConstraints[j]),remainingLower[i],upperConstraints[j]])
+        }
+        // console.log(intersections)
+    }
+    
+    for(var i=0;i<intersections.length;i++){
         var aboveUpper=false;
         var belowLower=false;
         for(var j=0;j<upperConstraints.length;j++){
-            if(check_above_or_below(upperConstraints[j],lower_intersections[i][0])){
-                aboveUpper=true;
-                break;
+            if(!on_line(upperConstraints[j],intersections[i][0])){
+                if(check_above_or_below(upperConstraints[j],intersections[i][0])){
+                    aboveUpper=true;
+                    break;
+                }
             }
+            
         }
         for(var j=0;j<remainingLower.length;j++){
-            if(remainingLower[j][0]!=lower_intersections[i][1][0] && remainingLower[j][0]!=lower_intersections[i][2][0]){
-                if(!check_above_or_below(remainingLower[j],lower_intersections[i][0])){
+            if(!on_line(remainingLower[j],intersections[i][0])){
+                if(!check_above_or_below(remainingLower[j],intersections[i][0])){
                     belowLower=true;
                     break;
                 }
@@ -505,11 +701,11 @@ function brute_force(){
             
         }
         if(!aboveUpper && !belowLower){
-            if(lower_intersections[i][0][1]<lowest_point[0]){
-                lowest_point=[lower_intersections[i][0][1],lower_intersections[i][0]]
+            if(intersections[i][0][1]<lowest_point[0]){
+                lowest_point=[intersections[i][0][1],intersections[i][0]]
             }
-            else if(lower_intersections[i][0][1]==lowest_point[0]){
-                lowest_point.push(lower_intersections[i][0])
+            else if(intersections[i][0][1]==lowest_point[0]){
+                lowest_point.push(intersections[i][0])
                 optimal_line=[lowest_point[1],lowest_point[2]]
                 return true
             }
@@ -531,9 +727,15 @@ var result=null;
 
 function step(){
     document.querySelector('.remainingLC_title').innerHTML = "#remaining lower constraints"
+    document.querySelector('.remainingUC_title').innerHTML = "#remaining upper constraints"
     document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+    document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+    if(remainingLower.length==0){
+        document.querySelector('.prompt').innerHTML = "No lower constraints, optimal point at infinity.";
+        return true
+    }
     if(!found){
-        if(remainingLower.length<=5){
+        if(remainingLower.length<=5 && upperConstraints.length<=5){
             if(brute_force()){
                 if(optimal_point){
                     ctx.beginPath();
@@ -569,32 +771,57 @@ function step(){
             }
             return true
         }
-        if(counter%3==0){
-            update()
-        }
-        else if(counter%3==1){
-            pair();
-            update_pair();
-            mid_int=get_median_intersection()
-            result=test_line(mid_int[0])
-            top_lower_constraint=result[0]
-            bottom_upper_constraint=result[1]
+        else if(remainingLower.length>5){
+            if(counter%3==0){
+                update()
+            }
+            else if(counter%3==1){
+                pair();
+                update_pair();
+                mid_int=get_median_intersection()
+                result=test_line(mid_int[0])
+                top_lower_constraint=result[0]
+                bottom_upper_constraint=result[1]
+            }
+            else{
+                remainingLower.length=0
+                discard_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)
+                update_discard();
+                if(leftover){
+                    remainingLower.push(leftover)
+                    leftover=null
+                }
+                constraints_to_discard.length=0
+                pairs_at_risk.length=0
+                document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+            }
         }
         else{
-            remainingLower.length=0
-            if(!discard_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)){
-                alert("found!")
+            if(counter%3==0){
+                update()
             }
-            update_discard();
-            if(leftover){
-                remainingLower.push(leftover)
-                leftover=null
+            else if(counter%3==1){
+                pair_upper();
+                update_upper_pair();
+                mid_int=get_median_intersection_upper()
+                result=test_line(mid_int[0])
+                top_lower_constraint=result[0]
+                bottom_upper_constraint=result[1]
             }
-            constraints_to_discard.length=0
-            pairs_at_risk.length=0
-            document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+            else{
+                upperConstraints.length=0
+                discard_upper_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)
+                update_discard();
+                if(upperleftover){
+                    upperConstraints.push(upperleftover)
+                    upperleftover=null
+                }
+                constraints_to_discard.length=0
+                pairs_at_risk.length=0
+                document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+            }
         }
-        counter++
+        
         
         
     }
@@ -607,7 +834,7 @@ function step(){
         }
         
     }
-    
+    counter++
 }
 
 function save_constraints(){
