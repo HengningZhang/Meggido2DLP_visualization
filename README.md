@@ -74,6 +74,9 @@ This is the course project for **CS-6703 Computational Geometry** under guidance
 
 
 ### The Algorithm
+
+Megiddo's algorithm is a deterministic linear programming algorithm that runs in O(n) time designed by *[Dr Nimrod Megiddo](http://theory.stanford.edu/~megiddo/bio.html)*.
+
 ### Implementation Details
 
 ### Built With
