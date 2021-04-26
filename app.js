@@ -571,40 +571,28 @@ function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_c
     var buc_ab=bottom_upper_constraint[1]
     //params of tlc and buc
     if(tlc_y>=buc_y){
+        //if not in feasible region
         if(bottom_upper_constraint.length>=3){
-            //potential optimal if >=2 lower constraints intersect
-            var a_smaller_than_0=false;
-            var a_bigger_than_0=false;
-            
+            var a_of_bucs=[]
             for(var i=1;i<bottom_upper_constraint.length;i++){
-                if(bottom_upper_constraint[i][0]<0){
-                    a_smaller_than_0=true;
-                }
-                else{
-                    a_bigger_than_0=true;
-                }
+                a_of_bucs.push(bottom_upper_constraint[i][0])
             }
-            if(a_smaller_than_0 && a_bigger_than_0){
-                //no feasible region exists
-                return false;
+            var max_of_array = Math.max.apply(Math, array);
+            var min_of_array = Math.min.apply(Math, array);
+            if(tlc_ab[0]>max_of_array){
+                //tlc[a]>max(buc[a]), feasible region may exist on left
+                document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]>max(buc[a]), discard upper right";
+                discard_right_upper(testline)
+            }
+            else if (tlc_ab[0]<min_of_array){
+                //tlc[a]<min(buc[a]), feasible region may exist on right
+                document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]<min(buc[a]), discard upper left";
+                discard_left_upper(testline)
             }
             else{
-                var a1=bottom_upper_constraint[1][0]
-                var a2=bottom_upper_constraint[2][0]
-                if(tlc_ab[0]>max(a1,a2)){
-                    //tlc[a]>max(buc[a]), feasible region may exist on left
-                    document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]>max(buc[a]), discard upper right";
-                    discard_right_upper(testline)
-                }
-                else if (tlc_ab[0]<min(a1,a2)){
-                    //tlc[a]<min(buc[a]), feasible region may exist on right
-                    document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]<min(buc[a]), discard upper left";
-                    discard_left_upper(testline)
-                }
-                else{
-                    return false
-                }       
-            }
+                return false
+            }       
+            
         }
         else{
             if (tlc_ab[0]>buc_ab[0]){
