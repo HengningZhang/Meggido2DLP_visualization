@@ -338,10 +338,10 @@ function test_line(x){
         constraint=upperConstraints[i];
         a=constraint[0];
         b=constraint[1];
-        if (a*x+b<bottom_upper_constraint[0]){
+        if (Math.round(parseFloat(a*x+b))<Math.round(bottom_upper_constraint[0])){
             bottom_upper_constraint=[a*x+b,[a,b]]
         }
-        else if(a*x+b==bottom_upper_constraint[0]){
+        else if(Math.round(parseFloat(a*x+b))==Math.round(bottom_upper_constraint[0])){
             bottom_upper_constraint.push([a,b])
         }
             
@@ -350,11 +350,11 @@ function test_line(x){
         constraint=remainingLower[i];
         a=constraint[0];
         b=constraint[1];
-        if (a*x+b>top_lower_constraint[0]){
+        if (Math.round(parseFloat(a*x+b))>Math.round(top_lower_constraint[0])){
            
             top_lower_constraint=[a*x+b,[a,b]]
         }
-        else if(a*x+b==top_lower_constraint[0]){
+        else if(Math.round(parseFloat(a*x+b))==Math.round(top_lower_constraint[0])){
             top_lower_constraint.push([a,b])
         }
             
