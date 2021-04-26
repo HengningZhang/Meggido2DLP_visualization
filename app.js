@@ -712,7 +712,61 @@ function brute_force(){
 var counter=0;
 var mid_int=null;
 var result=null;
+var alternate=true;
+var lowerGo=true;
+function step_lower(){
+    // console.log("doing lower",counter)
+    if(counter%3==0){
+        update()
+    }
+    else if(counter%3==1){
+        pair();
+        update_pair();
+        mid_int=get_median_intersection()
+        result=test_line(mid_int[0])
+        top_lower_constraint=result[0]
+        bottom_upper_constraint=result[1]
+    }
+    else{
+        remainingLower.length=0
+        discard_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)
+        update_discard();
+        if(leftover){
+            remainingLower.push(leftover)
+            leftover=null
+        }
+        constraints_to_discard.length=0
+        pairs_at_risk.length=0
+        document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+    }
+}
 
+function step_upper(){
+    // console.log("doing upper",counter)
+    if(counter%3==0){
+        update()
+    }
+    else if(counter%3==1){
+        pair_upper();
+        update_upper_pair();
+        mid_int=get_median_intersection_upper()
+        result=test_line(mid_int[0])
+        top_lower_constraint=result[0]
+        bottom_upper_constraint=result[1]
+    }
+    else{
+        upperConstraints.length=0
+        discard_upper_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)
+        update_discard();
+        if(upperleftover){
+            upperConstraints.push(upperleftover)
+            upperleftover=null
+        }
+        constraints_to_discard.length=0
+        pairs_at_risk.length=0
+        document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+    }
+}
 function step(){
     document.querySelector('.remainingLC_title').innerHTML = "#remaining lower constraints"
     document.querySelector('.remainingUC_title').innerHTML = "#remaining upper constraints"
@@ -759,54 +813,33 @@ function step(){
             }
             return true
         }
-        else if(remainingLower.length>5){
-            if(counter%3==0){
-                update()
+        else {
+            // console.log(remainingLower.length,upperConstraints.length,alternate,lowerGo,counter)
+            if(remainingLower.length==5 || upperConstraints.length==5){
+                alternate=false;
             }
-            else if(counter%3==1){
-                pair();
-                update_pair();
-                mid_int=get_median_intersection()
-                result=test_line(mid_int[0])
-                top_lower_constraint=result[0]
-                bottom_upper_constraint=result[1]
+            if(alternate){
+                if(lowerGo){
+                    step_lower()
+                    if(counter%3==2){
+                        lowerGo=false;
+                    }
+                    
+                }
+                else{
+                    step_upper()
+                    if(counter%3==2){
+                        lowerGo=true;
+                    }
+                }
             }
             else{
-                remainingLower.length=0
-                discard_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)
-                update_discard();
-                if(leftover){
-                    remainingLower.push(leftover)
-                    leftover=null
+                if(remainingLower.length>5){
+                    step_lower()
                 }
-                constraints_to_discard.length=0
-                pairs_at_risk.length=0
-                document.querySelector('.remainingLC').innerHTML = remainingLower.length;
-            }
-        }
-        else{
-            if(counter%3==0){
-                update()
-            }
-            else if(counter%3==1){
-                pair_upper();
-                update_upper_pair();
-                mid_int=get_median_intersection_upper()
-                result=test_line(mid_int[0])
-                top_lower_constraint=result[0]
-                bottom_upper_constraint=result[1]
-            }
-            else{
-                upperConstraints.length=0
-                discard_upper_constraints(mid_int[0],top_lower_constraint,bottom_upper_constraint)
-                update_discard();
-                if(upperleftover){
-                    upperConstraints.push(upperleftover)
-                    upperleftover=null
+                else{
+                    step_upper()
                 }
-                constraints_to_discard.length=0
-                pairs_at_risk.length=0
-                document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
             }
         }
         
