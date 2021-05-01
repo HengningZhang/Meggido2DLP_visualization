@@ -598,14 +598,14 @@ function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_c
             if (tlc_ab[0]>buc_ab[0]){
                 //optimal point can exist on the left
                 //discard half of the pairs on the right with larger a
-                document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on right";
+                document.querySelector('.prompt').innerHTML = "not feasible, TLC'>BUC', discard upper right";
                 discard_right_upper(testline)
                 return true
             }
             else{
                 //optimal point can exist on the right
                 //discard half of the pairs on the left with smaller a
-                document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on left";
+                document.querySelector('.prompt').innerHTML = "not feasible, TLC'>BUC', discard upper left";
                 discard_left_upper(testline)
                 return true
             }
@@ -615,12 +615,12 @@ function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_c
         //already inside feasible region
         if(top_lower_constraint[1][0]>0){
             //optimal point on left
-            document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard on right";
+            document.querySelector('.prompt').innerHTML = "TLC'>0 and feasible, discard upper right";
             discard_right_upper(testline)
         }
         else{
             //optimal point on right
-            document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard on left";
+            document.querySelector('.prompt').innerHTML = "TLC'<0 and feasible, discard upper left";
             discard_left_upper(testline)
         }
         return true;
@@ -768,10 +768,13 @@ function step_upper(){
     }
 }
 function step(){
-    document.querySelector('.remainingLC_title').innerHTML = "#remaining lower constraints"
-    document.querySelector('.remainingUC_title').innerHTML = "#remaining upper constraints"
-    document.querySelector('.remainingLC').innerHTML = remainingLower.length;
-    document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+    if(counter==0){
+        document.querySelector('.remainingLC_title').innerHTML = "#remaining lower constraints"
+        document.querySelector('.remainingUC_title').innerHTML = "#remaining upper constraints"
+        document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+        document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+    }
+    
     
     if(!found){
         if(remainingLower.length==0){
@@ -816,7 +819,7 @@ function step(){
         }
         else {
             // console.log(remainingLower.length,upperConstraints.length,alternate,lowerGo,counter)
-            if(remainingLower.length==5 || upperConstraints.length==5){
+            if(remainingLower.length<=5 || upperConstraints.length<=5){
                 alternate=false;
             }
             if(alternate){
@@ -842,10 +845,7 @@ function step(){
                     step_upper()
                 }
             }
-        }
-        
-        
-        
+        }   
     }
     else{
         if(optimal_point || optimal_line){
