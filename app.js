@@ -299,7 +299,7 @@ function get_median_intersection(){
     }
     ctx.beginPath();
     ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
-    ctx.fillStyle = 'yellow';
+    ctx.fillStyle = 'orange';
     ctx.fill()
     ctx.stroke();
     return intersection
@@ -321,7 +321,7 @@ function get_median_intersection_upper(){
     ctx.beginPath();
     // console.log(intersection)
     ctx.arc(intersection[0], -intersection[1], 10, 0, 2 * Math.PI, false);
-    ctx.fillStyle = 'yellow';
+    ctx.fillStyle = 'orange';
     ctx.fill()
     ctx.stroke();
     return intersection
@@ -361,7 +361,7 @@ function test_line(x){
     }
     
     //what if top/bottom is an intersection?
-    ctx.strokeStyle = "yellow";
+    ctx.strokeStyle = "orange";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x,0);
@@ -577,8 +577,8 @@ function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_c
             for(var i=1;i<bottom_upper_constraint.length;i++){
                 a_of_bucs.push(bottom_upper_constraint[i][0])
             }
-            var max_of_array = Math.max.apply(Math, array);
-            var min_of_array = Math.min.apply(Math, array);
+            var max_of_array = Math.max.apply(Math, a_of_bucs);
+            var min_of_array = Math.min.apply(Math, a_of_bucs);
             if(tlc_ab[0]>max_of_array){
                 //tlc[a]>max(buc[a]), feasible region may exist on left
                 document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]>max(buc[a]), discard upper right";
@@ -772,11 +772,12 @@ function step(){
     document.querySelector('.remainingUC_title').innerHTML = "#remaining upper constraints"
     document.querySelector('.remainingLC').innerHTML = remainingLower.length;
     document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
-    if(remainingLower.length==0){
-        document.querySelector('.prompt').innerHTML = "No lower constraints, optimal point at infinity.";
-        return true
-    }
+    
     if(!found){
+        if(remainingLower.length==0){
+            document.querySelector('.prompt').innerHTML = "No lower constraints, optimal point at infinity.";
+            return true
+        }
         if(remainingLower.length<=5 && upperConstraints.length<=5){
             if(brute_force()){
                 if(optimal_point){
