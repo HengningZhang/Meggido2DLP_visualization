@@ -95,21 +95,28 @@ For the lower constraints:
 <br>
 For upper constraints, there is a similar set of functions that includes `_upper` in their function names.
 
+- `brute_force()` calculates the optimal point when both sides have <= 5 constraints remaining.
 - `step_lower()` calls `discard_lower()` and handles the displays if there are more than 5 lower constraints remaining. `step_upper()` does the same thing, but with upper constraints.
 - `step()` is the function that triggers when the run button in index.html is pressed, it determines which side to process, displays result if optimal point if found or does not exist and displays console messages.
 
+### Unexpected Difficulties/Complications
+[edge-case-for-upper-multiple-TLC_1][upper-multiple-tlc-1]
+[edge-case-for-upper-multiple-TLC_2][upper-multiple-tlc-2]
 
 ### Built With
 * [Javascript](https://www.javascript.com/)
 * [HTML](https://html.com/)
 
 ### My Own Work
-- Codes from online 
+- Codes/Tools from online 
   - `median()`: a tiny function that calls JavaScript's built in sorting function.
   - `draw()`,`onmousedown()`,`onmouseup()`,`onmousemove()`and `canvas` component of `index.html`: the functions and web component that enables the drawing effects is from https://stackoverflow.com/questions/49885020/drawing-a-straight-line-using-mouse-events-on-canvas-in-javascript. As you can see by following the link, it is a very basic drawing board. It does not even provide functions to store the lines as coefficients. 
+  - This README template, `Best-README-Template`, from [https://github.com/othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template).
+  - Deployment of the webapp by GitHub Pages.
 - Understanding the algorithm
+  - homework materials by *[Prof. Boris Aronov](https://engineering.nyu.edu/faculty/boris-aronov)* at **NYU Tandon School of Engineering**.
   - course notes by *[Prof. Greg Aloupis](https://engineering.nyu.edu/faculty/greg-aloupis)* at **NYU Tandon School of Engineering**.
-- The rest of the project is my own work.
+- The rest of the project is my own work, including parsing and storing the input, implmentation of all the steps in Megiddo's algorithm and visualization of the step results on HTML canvas.
 
 ### Signature
 
@@ -170,3 +177,6 @@ LinkedIn: [https://www.linkedin.com/in/hengning-zhang-4840b5167/](https://www.li
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/hengning-zhang-4840b5167/
 [signature]: images/sign.png
+[upper-multiple-tlc-1]: images/upper-multiple-tlc-1.png
+[upper-multiple-tlc-2]: images/upper-multiple-tlc-2.png
+[early-optimal]: images/early-optimal.png

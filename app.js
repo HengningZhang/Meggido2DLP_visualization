@@ -572,20 +572,50 @@ function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_c
     //params of tlc and buc
     if(tlc_y>=buc_y){
         //if not in feasible region
+        if(top_lower_constraint.length>=3){
+            //if the two TLCs are constraining strickly upwards, the optimal point does not exist
+            var a_smaller_than_0=false;
+            var a_bigger_than_0=false;
+            
+            for(var i=1;i<top_lower_constraint.length;i++){
+                if(top_lower_constraint[i][0]==0){
+                    optimal_line=top_lower_constraint[i]
+                    found=true;
+                    return true;
+                }
+                else if(top_lower_constraint[i][0]<0){
+                    a_smaller_than_0=true;
+                }
+                else{
+                    a_bigger_than_0=true;
+                }
+            }
+            if(a_smaller_than_0 && a_bigger_than_0){
+                //no need to check anymore if optimal is strickly upwards.
+                return false;
+            }
+        }
         if(bottom_upper_constraint.length>=3){
+            // if min(tlc)<min(buc) then optimal point may on right, if max(tlc)>min(buc) the optimal point may on left, else no feasible region
             var a_of_bucs=[]
             for(var i=1;i<bottom_upper_constraint.length;i++){
                 a_of_bucs.push(bottom_upper_constraint[i][0])
             }
-            var max_of_array = Math.max.apply(Math, a_of_bucs);
-            var min_of_array = Math.min.apply(Math, a_of_bucs);
-            if(tlc_ab[0]>max_of_array){
-                //tlc[a]>max(buc[a]), feasible region may exist on left
+            var max_of_buc = Math.max.apply(Math, a_of_bucs);
+            var min_of_buc = Math.min.apply(Math, a_of_bucs);
+            var a_of_tlcs=[]
+            for(var i=1;i<top_lower_constraint.length;i++){
+                a_of_tlcs.push(top_lower_constraint[i][0])
+            }
+            var max_of_tlc = Math.max.apply(Math, a_of_tlcs);
+            var min_of_tlc = Math.min.apply(Math, a_of_tlcs);
+            if(min_of_tlc>max_of_buc){
+                //feasible region may exist on left
                 document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]>max(buc[a]), discard upper right";
                 discard_right_upper(testline)
             }
-            else if (tlc_ab[0]<min_of_array){
-                //tlc[a]<min(buc[a]), feasible region may exist on right
+            else if (max_of_tlc<min_of_buc){
+                //feasible region may exist on right
                 document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]<min(buc[a]), discard upper left";
                 discard_left_upper(testline)
             }
