@@ -22,20 +22,6 @@ Implemention of Megiddo's 2D Linear Programming algorithm that computes the opti
 
 <!-- PROJECT LOGO -->
 <br />
-<p align="center">
-  
-  <p align="center">
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
-  </p>
-</p>
 
 
 
@@ -59,7 +45,6 @@ Implemention of Megiddo's 2D Linear Programming algorithm that computes the opti
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
@@ -76,26 +61,66 @@ This is the course project for **CS-6703 Computational Geometry** under guidance
 ### The Algorithm
 
 Megiddo's algorithm is a deterministic linear programming algorithm that runs in O(n) time designed by *[Dr Nimrod Megiddo](http://theory.stanford.edu/~megiddo/bio.html)*.
+<br>
+I am implementing its 2D straight line version for my project.
+The algorithm does the following things:
+1. Pair the lower constraints arbitrarily and calculate intersection point for each pair
+2. Find the median x value of the paired intersections
+3. Deploy a vertical test line at the median x value, get top lower constraint(s) and bottom upper constraint(s). In the following content of the report I will used their abbreviations--TLC and BUC.
+4. Discard one constraint every pair for half of the intersecting pairs, depending on the information returned by the test line.
+5. Do 1-4 again, but with constraints on the other side
+<br>
+By doing these steps, we get a recurrence that can be written like: T(n)=T(7/8n)+O(n), which is a decreasing geometric series that sums up to O(n).
 
 ### Implementation Details
+Technically speaking the whole project should have been divided into a implementation part and a visualization part, but I did them together to make the process easier for me.
+
+I split the steps to these smaller functions:
+- `median()`:get the median from an array of numbers
+- `draw()`,`onmousedown()`,`onmouseup()`,`onmousemove()` are the functions that allow drawing on the board. 
+- `process_line()`: takes the coordinates of two points and returns (a,b) after calculating the line in y=ax+b form.
+- `get_full_line()`: calculates the segment to be displayed on the board (extends to the boundary of the board).
+- `calculate_intersection()` that calculates the intersection point of two lines.
+- `test_line()` 1) deploys the test line that returns the TLC(s) and BUC(s); 2) draws the test line and Highlight TLC and BUC with different colors on the board.
+<br>
+For the lower constraints:
+
+- `pair()`: pairs the remaining lower constraints arbitrarily.
+- `update()`: clears the board and then draws the current subproblem (all the remaining constraints).
+- `update_pair()`: draws intersection of the current pairs on the board.
+- `update_discard()`: draws 1) the intersection points of the pairs that will have one of the constraints discarded 2) the constraints that are discarded in the current iteration
+- `get_median_intersection()`: finds the median x value of the pairs’ intersections.
+- `discard_left()` and `discard_right()`: discard half of the constraints on one side, 
+- `discard_constraints()`:takes the result of test_line() and uses the TLC and BUC to determine which discard function to call.
+<br>
+For upper constraints, there is a similar set of functions that includes `_upper` in their function names.
+
+- `step_lower()` calls `discard_lower()` and handles the displays if there are more than 5 lower constraints remaining. `step_upper()` does the same thing, but with upper constraints.
+- `step()` is the function that triggers when the run button in index.html is pressed, it determines which side to process, displays result if optimal point if found or does not exist and displays console messages.
+
 
 ### Built With
 * [Javascript](https://www.javascript.com/)
 * [HTML](https://html.com/)
 
 ### My Own Work
+- Codes from online 
+  - `median()`: a tiny function that calls JavaScript's built in sorting function.
+  - `draw()`,`onmousedown()`,`onmouseup()`,`onmousemove()`and `canvas` component of `index.html`: the functions and web component that enables the drawing effects is from https://stackoverflow.com/questions/49885020/drawing-a-straight-line-using-mouse-events-on-canvas-in-javascript. As you can see by following the link, it is a very basic drawing board. It does not even provide functions to store the lines as coefficients. 
+- Understanding the algorithm
+  - course notes by *[Prof. Greg Aloupis](https://engineering.nyu.edu/faculty/greg-aloupis)* at **NYU Tandon School of Engineering**.
+- The rest of the project is my own work.
+
 ### Signature
 
-
+[signature-HengningZhang][signature]
 
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
-
 
 ### Installation
 Clone the repo
@@ -104,20 +129,6 @@ Clone the repo
    ```
 Open index.html in your favorite brower and it will be ready to go.
 
-
-
-
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 
 
@@ -134,24 +145,13 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Hengning Zhang hz1704@nyu.edu
 
 Project Link: [https://github.com/HengningZhang/Megiddo2DLP_visualization/](https://github.com/HengningZhang/Megiddo2DLP_visualization/)
-
+LinkedIn: [https://www.linkedin.com/in/hengning-zhang-4840b5167/](https://www.linkedin.com/in/hengning-zhang-4840b5167/)
 
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Img Shields](https://shields.io)
-* [Choose an Open Source License](https://choosealicense.com)
+* [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 * [GitHub Pages](https://pages.github.com)
-* [Animate.css](https://daneden.github.io/animate.css)
-* [Loaders.css](https://connoratherton.com/loaders)
-* [Slick Carousel](https://kenwheeler.github.io/slick)
-* [Smooth Scroll](https://github.com/cferdinandi/smooth-scroll)
-* [Sticky Kit](http://leafo.net/sticky-kit)
-* [JVectorMap](http://jvectormap.com)
-* [Font Awesome](https://fontawesome.com)
-
-
 
 
 
@@ -169,4 +169,4 @@ Project Link: [https://github.com/HengningZhang/Megiddo2DLP_visualization/](http
 [license-url]: https://github.com/HengningZhang/Megiddo2DLP_visualization/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/hengning-zhang-4840b5167/
-[product-screenshot]: images/screenshot.png
+[signature]: images/sign.png
