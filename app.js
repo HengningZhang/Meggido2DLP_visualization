@@ -328,7 +328,6 @@ function get_median_intersection_upper(){
 }
 
 function test_line(x){
-    document.querySelector('.prompt').innerHTML = "deploying test line";
     bottom_upper_constraint=[Number.MAX_VALUE,[0,0]]
     top_lower_constraint=[Number.MIN_SAFE_INTEGER,[0,0]]
     var a=null;
@@ -474,6 +473,7 @@ function discard_right_upper(testline){
     }
 }
 
+
 function discard_constraints(testline,top_lower_constraint, bottom_upper_constraint){
     var tlc_y=top_lower_constraint[0]
     var buc_y=bottom_upper_constraint[0]
@@ -482,24 +482,36 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
     var buc_ab=bottom_upper_constraint[1]
     //params of tlc and buc
     if(tlc_y>=buc_y){
-        if(tlc_ab[0]==buc_ab[0]){
-            //tlc and buc are parallel, no optimal point can exist
-            return false
+        //not in feasible region
+        var a_of_bucs=[]
+        for(var i=1;i<bottom_upper_constraint.length;i++){
+            a_of_bucs.push(bottom_upper_constraint[i][0])
         }
-        else if (tlc_ab[0]>buc_ab[0]){
-            //optimal point can exist on the left
-            //discard half of the pairs on the right with larger a
-            document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on right";
+        var max_of_buc = Math.max.apply(Math, a_of_bucs);
+        var min_of_buc = Math.min.apply(Math, a_of_bucs);
+        var a_of_tlcs=[]
+        for(var i=1;i<top_lower_constraint.length;i++){
+            a_of_tlcs.push(top_lower_constraint[i][0])
+        }
+        var max_of_tlc = Math.max.apply(Math, a_of_tlcs);
+        var min_of_tlc = Math.min.apply(Math, a_of_tlcs);
+        if(min_of_tlc>max_of_buc){
+            //feasible region may exist on left
+            console.log(1)
+            document.querySelector('.prompt').innerHTML = "not feasible, min(tlc')>max(buc'), discard lower right";
             discard_right(testline)
             return true
         }
-        else{
-            //optimal point can exist on the right
-            //discard half of the pairs on the left with smaller a
-            document.querySelector('.prompt').innerHTML = "not in feasible region, TLC'>BUC', discard on left";
+        else if (max_of_tlc<min_of_buc){
+            //feasible region may exist on right
+            console.log(2)
+            document.querySelector('.prompt').innerHTML = "not feasible, max(tlc')&lt;min(buc[a]), discard lower left";
             discard_left(testline)
             return true
         }
+        else{
+            return false
+        }    
     }
     else{
         //already inside feasible region
@@ -537,12 +549,12 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
                 if(!a_smaller_than_0){
                     //all of tlc have a bigger than 0
                     //optimal on the left
-                    document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard on right";
+                    document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard lower right";
                     discard_right(testline)
                 }
                 else{
                     //optimal on the right
-                    document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard on left";
+                    document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard lower left";
                     discard_left(testline)
                 }        
             }
@@ -550,12 +562,12 @@ function discard_constraints(testline,top_lower_constraint, bottom_upper_constra
         else{
             if(top_lower_constraint[1][0]>0){
                 //optimal point on left
-                document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard on right";
+                document.querySelector('.prompt').innerHTML = "TLC'>0 and in feasible region, discard lower right";
                 discard_right(testline)
             }
             else{
                 //optimal point on right
-                document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard on left";
+                document.querySelector('.prompt').innerHTML = "TLC'<0 and in feasible region, discard lower left";
                 discard_left(testline)
             }
         }
@@ -567,79 +579,40 @@ function discard_upper_constraints(testline,top_lower_constraint, bottom_upper_c
     var tlc_y=top_lower_constraint[0]
     var buc_y=bottom_upper_constraint[0]
     //values of tlc and buc at test line
-    var tlc_ab=top_lower_constraint[1]
-    var buc_ab=bottom_upper_constraint[1]
+
     //params of tlc and buc
     if(tlc_y>=buc_y){
         //if not in feasible region
-        if(top_lower_constraint.length>=3){
-            //if the two TLCs are constraining strickly upwards, the optimal point does not exist
-            var a_smaller_than_0=false;
-            var a_bigger_than_0=false;
-            
-            for(var i=1;i<top_lower_constraint.length;i++){
-                if(top_lower_constraint[i][0]==0){
-                    optimal_line=top_lower_constraint[i]
-                    found=true;
-                    return true;
-                }
-                else if(top_lower_constraint[i][0]<0){
-                    a_smaller_than_0=true;
-                }
-                else{
-                    a_bigger_than_0=true;
-                }
-            }
-            if(a_smaller_than_0 && a_bigger_than_0){
-                //no need to check anymore if optimal is strickly upwards.
-                return false;
-            }
+        // if min(tlc)<min(buc) then optimal point may on right, if max(tlc)>min(buc) the optimal point may on left, else no feasible region
+        var a_of_bucs=[]
+        for(var i=1;i<bottom_upper_constraint.length;i++){
+            a_of_bucs.push(bottom_upper_constraint[i][0])
         }
-        if(bottom_upper_constraint.length>=3){
-            // if min(tlc)<min(buc) then optimal point may on right, if max(tlc)>min(buc) the optimal point may on left, else no feasible region
-            var a_of_bucs=[]
-            for(var i=1;i<bottom_upper_constraint.length;i++){
-                a_of_bucs.push(bottom_upper_constraint[i][0])
-            }
-            var max_of_buc = Math.max.apply(Math, a_of_bucs);
-            var min_of_buc = Math.min.apply(Math, a_of_bucs);
-            var a_of_tlcs=[]
-            for(var i=1;i<top_lower_constraint.length;i++){
-                a_of_tlcs.push(top_lower_constraint[i][0])
-            }
-            var max_of_tlc = Math.max.apply(Math, a_of_tlcs);
-            var min_of_tlc = Math.min.apply(Math, a_of_tlcs);
-            if(min_of_tlc>max_of_buc){
-                //feasible region may exist on left
-                document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]>max(buc[a]), discard upper right";
-                discard_right_upper(testline)
-            }
-            else if (max_of_tlc<min_of_buc){
-                //feasible region may exist on right
-                document.querySelector('.prompt').innerHTML = "not feasible, tlc[a]<min(buc[a]), discard upper left";
-                discard_left_upper(testline)
-            }
-            else{
-                return false
-            }       
-            
+        var max_of_buc = Math.max.apply(Math, a_of_bucs);
+        var min_of_buc = Math.min.apply(Math, a_of_bucs);
+        var a_of_tlcs=[]
+        for(var i=1;i<top_lower_constraint.length;i++){
+            a_of_tlcs.push(top_lower_constraint[i][0])
+        }
+        var max_of_tlc = Math.max.apply(Math, a_of_tlcs);
+        var min_of_tlc = Math.min.apply(Math, a_of_tlcs);
+        if(min_of_tlc>max_of_buc){
+            //feasible region may exist on left
+            console.log(3)
+            document.querySelector('.prompt').innerHTML = "not feasible, min(tlc')>max(buc'), discard upper right";
+            discard_right_upper(testline)
+        }
+        else if (max_of_tlc<min_of_buc){
+            //feasible region may exist on right
+            console.log(4)
+            document.querySelector('.prompt').innerHTML = "not feasible, max(tlc')&lt;min(buc[a]), discard upper left";
+            discard_left_upper(testline)
         }
         else{
-            if (tlc_ab[0]>buc_ab[0]){
-                //optimal point can exist on the left
-                //discard half of the pairs on the right with larger a
-                document.querySelector('.prompt').innerHTML = "not feasible, TLC'>BUC', discard upper right";
-                discard_right_upper(testline)
-                return true
-            }
-            else{
-                //optimal point can exist on the right
-                //discard half of the pairs on the left with smaller a
-                document.querySelector('.prompt').innerHTML = "not feasible, TLC'>BUC', discard upper left";
-                discard_left_upper(testline)
-                return true
-            }
-        }
+            return false
+        }       
+            
+        
     }
     else{
         //already inside feasible region
@@ -680,6 +653,7 @@ function on_line(line,point){
     var y=point[1]
     return Math.round(parseFloat(a*x+b))==Math.round(parseFloat(y))
 }
+
 function brute_force(){
     var lowest_point=[Number.MAX_VALUE]
     var intersections=[]
@@ -690,11 +664,9 @@ function brute_force(){
     }
 
     for(var i=0;i<remainingLower.length;i++){
-        // console.log(intersections)
         for(var j=0;j<upperConstraints.length;j++){
             intersections.push([calculate_intersection(remainingLower[i],upperConstraints[j]),remainingLower[i],upperConstraints[j]])
         }
-        // console.log(intersections)
     }
     
     for(var i=0;i<intersections.length;i++){
@@ -730,11 +702,42 @@ function brute_force(){
         }
         
     }
+
     if(lowest_point[0]!=Number.MAX_VALUE){
         optimal_point=lowest_point[1]
+        if(optimal_point){
+            ctx.beginPath();
+            ctx.arc(optimal_point[0], -optimal_point[1], 15, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'green';
+            ctx.fill()
+            ctx.stroke();
+            document.querySelector('.prompt').innerHTML = "Optimal point found";
+        }
+        else{
+            ctx.beginPath();
+            ctx.arc(optimal_line[0][0], -optimal_line[0][1], 15, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'green';
+            ctx.fill()
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(optimal_line[1][0], -optimal_line[1][1], 15, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'green';
+            ctx.fill()
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.strokeStyle = "lime";
+            ctx.moveTo(optimal_line[0][0],-optimal_line[0][1]);
+            ctx.lineTo(optimal_line[1][0],-optimal_line[1][1]);
+            ctx.stroke();
+            document.querySelector('.prompt').innerHTML = "Optimal point is on a line";
+        }
+        found=true
+        
         return true
     }
     else{
+        document.querySelector('.prompt').innerHTML = "No feasible region";
+        found=true
         return false
     }
      
@@ -753,6 +756,7 @@ function step_lower(){
         pair();
         update_pair();
         mid_int=get_median_intersection()
+        document.querySelector('.prompt').innerHTML = "deploying test line for discarding lower";
         result=test_line(mid_int[0])
         top_lower_constraint=result[0]
         bottom_upper_constraint=result[1]
@@ -767,7 +771,10 @@ function step_lower(){
         }
         constraints_to_discard.length=0
         pairs_at_risk.length=0
-        document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+        if(!found){
+            document.querySelector('.remainingLC').innerHTML = remainingLower.length;
+        }
+        
     }
 }
 
@@ -780,6 +787,7 @@ function step_upper(){
         pair_upper();
         update_upper_pair();
         mid_int=get_median_intersection_upper()
+        document.querySelector('.prompt').innerHTML = "deploying test line for discarding upper";
         result=test_line(mid_int[0])
         top_lower_constraint=result[0]
         bottom_upper_constraint=result[1]
@@ -794,7 +802,10 @@ function step_upper(){
         }
         constraints_to_discard.length=0
         pairs_at_risk.length=0
-        document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+        if(!found){
+            document.querySelector('.remainingUC').innerHTML = upperConstraints.length;
+        }
+        
     }
 }
 function step(){
@@ -812,39 +823,7 @@ function step(){
             return true
         }
         if(remainingLower.length<=5 && upperConstraints.length<=5){
-            if(brute_force()){
-                if(optimal_point){
-                    ctx.beginPath();
-                    ctx.arc(optimal_point[0], -optimal_point[1], 15, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = 'green';
-                    ctx.fill()
-                    ctx.stroke();
-                    document.querySelector('.prompt').innerHTML = "Optimal point found";
-                }
-                else{
-                    ctx.beginPath();
-                    ctx.arc(optimal_line[0][0], -optimal_line[0][1], 15, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = 'green';
-                    ctx.fill()
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(optimal_line[1][0], -optimal_line[1][1], 15, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = 'green';
-                    ctx.fill()
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.strokeStyle = "lime";
-                    ctx.moveTo(optimal_line[0][0],-optimal_line[0][1]);
-                    ctx.lineTo(optimal_line[1][0],-optimal_line[1][1]);
-                    ctx.stroke();
-                    document.querySelector('.prompt').innerHTML = "Optimal point is on a line";
-                }
-                found=true
-            }
-            else{
-                document.querySelector('.prompt').innerHTML = "No feasible region";
-                found=true
-            }
+            brute_force()
             return true
         }
         else {
