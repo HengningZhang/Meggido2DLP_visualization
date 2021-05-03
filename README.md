@@ -34,6 +34,7 @@ Implemention of Megiddo's 2D Linear Programming algorithm that computes the opti
       <ul>
         <li><a href="#the-algorithm">The Algorithm</a></li>
         <li><a href="#implementation-details">Implementation Details</a></li>
+        <li><a href="#unexpected-difficulties-and-complications">Unexpected Difficulties and Complications</a></li>
         <li><a href="#built-with">Built With</a></li>
         <li><a href="#my-own-work">My Own Work</a></li>
         <li><a href="#signature">Signature</a></li>
@@ -99,9 +100,23 @@ For upper constraints, there is a similar set of functions that includes `_upper
 - `step_lower()` calls `discard_lower()` and handles the displays if there are more than 5 lower constraints remaining. `step_upper()` does the same thing, but with upper constraints.
 - `step()` is the function that triggers when the run button in index.html is pressed, it determines which side to process, displays result if optimal point if found or does not exist and displays console messages.
 
-### Unexpected Difficulties/Complications
-[edge-case-for-upper-multiple-TLC_1][upper-multiple-tlc-1]
-[edge-case-for-upper-multiple-TLC_2][upper-multiple-tlc-2]
+### Unexpected Difficulties and Complications
+- When dealing with both sides of the constraints, it is not sufficient to deal with one side after dealing with another. Because `test_line()` costs O(#remaining constraints) and not alternating would make `step()` cost quadratic time.
+- At first, I wanted to display every paired intersections on the board. However, as the intersection coordinates can be far away outside the board, I decide not to display them. This visualization is only focusing on the intersections inside this board and only the inputs that make the intersections inside the board will display a better visual presentation of the algorithm.
+- There are some edge cases with `test_line()`, namingly when there are multiple TLCs or multiple BUCs.
+  - If in feasible region, multiple BUCs does not affect the decision
+    - If multiple TLCs, an early detection of the optimal point may happen when there is at least one TLC with positive derivative and another with negative derivative at test line, because local minimum is global minimum in straight line linear programming problem.
+    - ![early-optimal][early-optimal]
+  - If not in feasible region
+    - if there are multiple TLCs
+      - There will be no feasible region if there is at least one TLC with positive derivative and another with negative derivative at test line, because these two TLCs constraints the feasible region to be always above the BUC.
+        - ![edge-case-for-upper-multiple-TLC_1][upper-multiple-tlc-1]
+      - Or the side where feasible region may exist can be determined by comparing min(TLC') to max(BUC') (highest TLC and lowest BUC on the left) and max(TLC') to min(BUC') (highest TLC and lowest BUC on the right). If min(TLC') > max(BUC'), it means at some x value to the left, the lower constraint with a=min(TLC') will be below the upper constraint with a=min(BUC'), thus there might be a feasible region on the left, so it is safe to discard on right. Vise versa with max(TLC') < min(BUC').
+        - ![edge-case-for-upper-multiple-TLC_2][upper-multiple-tlc-2]
+        - In this case no feasible region exists be cause neither min(TLC') > max(BUC') or max(TLC') < min(BUC') is true.
+    - If ther are mltiple BUCs:
+      - As we are already using max(BUC') and min(BUC') in the case of dealing with multiple TLCs, they are already taken care of.
+- The console messages are also causing some confusions. Now I really understand why we need those UIUX guys. I respect them totally now.
 
 ### Built With
 * [Javascript](https://www.javascript.com/)
@@ -119,8 +134,9 @@ For upper constraints, there is a similar set of functions that includes `_upper
 - The rest of the project is my own work, including parsing and storing the input, implmentation of all the steps in Megiddo's algorithm and visualization of the step results on HTML canvas.
 
 ### Signature
-
-[signature-HengningZhang][signature]
+I, Hengning Zhang, confirm that all the information stated in <a href="#my-own-work">My Own Work</a> is correct.<br>
+Here is my signature:
+![signature-HengningZhang][signature]
 
 
 
