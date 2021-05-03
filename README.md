@@ -109,10 +109,9 @@ For upper constraints, there is a similar set of functions that includes `_upper
     - ![early-optimal][early-optimal]
   - If not in feasible region
     - if there are multiple TLCs
-      - ![edge-case-for-upper-multiple-TLC_1][upper-multiple-tlc-1]
-      - Or the side where feasible region may exist can be determined by comparing min(TLC') to max(BUC') (highest TLC and lowest BUC on the left) and max(TLC') to min(BUC') (highest TLC and lowest BUC on the right). If min(TLC') > max(BUC'), it means at some x value to the left, the lower constraint with a=min(TLC') will be below the upper constraint with a=min(BUC'), thus there might be a feasible region on the left, so it is safe to discard on right. Vise versa with max(TLC') < min(BUC').
-        - ![edge-case-for-upper-multiple-TLC_2][upper-multiple-tlc-2]
-        - In this case no feasible region exists be cause neither min(TLC') > max(BUC') or max(TLC') < min(BUC') is true. This means the top lower constraints are constraining the feasible region in a convex region strickly above bottom lower constraints so no feasible region exists.
+      - The side where feasible region may exist can be determined by comparing min(TLC') to max(BUC') (highest TLC and lowest BUC on the left) and max(TLC') to min(BUC') (highest TLC and lowest BUC on the right). If min(TLC') > max(BUC'), it means at some x value to the left, the lower constraint with a=min(TLC') will be below the upper constraint with a=min(BUC'), thus there might be a feasible region on the left, so it is safe to discard on right. Vise versa with max(TLC') < min(BUC').
+      - ![edge-case-for-upper-multiple-TLC_2][upper-multiple-tlc-2]
+      - In this case no feasible region exists be cause neither min(TLC') > max(BUC') or max(TLC') < min(BUC') is true. This means the top lower constraints are constraining the feasible region in a convex region strickly above bottom lower constraints so no feasible region exists.
     - If ther are mltiple BUCs:
       - As we are already using max(BUC') and min(BUC') in the case of dealing with multiple TLCs, they are already taken care of.
 - The console messages are also causing some confusions. Now I really understand why we need those UIUX guys. I respect them totally now.
